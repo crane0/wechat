@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width =device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable = 0" />
+  <title>猜电影</title>
+</head>
+<style>
+  *{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-decoration: none
+  }
+  html, body{
+    width: 100%;
+    height: 100%;
+  }
+  .cover{
+    width: 100% ;
+    text-align: center;
+  }
+  #btn{
+    border: 1px solid #00b600;
+    padding: .4rem;
+    border-radius: 5px;
+    margin-top: 1.5rem;
+    background: #fff;
+    color: #00b600;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .list{
+    box-sizing: border-box;
+    padding: 1rem .5rem;
+    width: 100%;
+    overflow: hidden;
+  }
+  .list>.item {
+    width: 33.3333%;
+    height: 10rem;
+    box-sizing: border-box;
+    padding: .5rem .2rem;
+    float: left;
+  }
+
+  .list>.item>a{
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .list>.item>a>.cover{
+    width: 100%;
+    height: 7rem;
+  }
+  .list>.item>a>.cover>img{
+    display: block;
+    width: 100%;
+    height: 6.5rem;
+  }
+  .list>.item>a>.info>h3{
+    text-align: center;
+    font-size: .6rem;
+    color: #494949;
+  }
+  .list>.item>a>.info>.rank{
+    text-align: center;
+    font-size: .6rem;
+    color: #9b9b9b;
+  }
+  .page{
+    box-sizing: border-box;
+    padding: 1rem .5rem;
+    width: 100%;
+  }
+  .page>.info{
+    width: 100%;
+    height: 7.6rem;
+  }
+  .page>.info>.right{
+    float: right;
+    width: 35%;
+  }
+  .page>.info>.right>a{
+    display: block;
+    width: 100%;
+  }
+  .page>.info>.right>a>img{
+    display: block;
+    width: 100%;
+    height: 7.6rem
+  }
+  .page>.info>.left{
+    float: left;
+    width: 56%;
+  }
+  .page>.info>.left>p{
+    font-size: .7rem;
+    color: #494949;
+  }
+  .page>.info>.left>.rating{
+    margin: .2rem 0 .8rem 0;
+  }
+  .page>.info>.left>.meta{
+    font-size: .6rem;
+    line-height: 1.1rem;
+  }
+  .page>.info>.left>.rating>span{
+    color: lightgreen;
+    margin: .2rem 0 .8rem 0;
+  }
+  .page>.info>.left>.rating>.ratingNum{
+    margin-left: .5rem;
+    color: #aaa;
+  }
+</style>
+
+<body>
+  <div class="cover">
+    <button id="btn">点击开始录音</button>
+  </div>
+
+  <!--这里是搜索后的内容，填充的位置-->
+  <ul class="list">
+
+  </ul>
+
+  <!--这个是微信官方提供的接口，要先引入，后面的才有效-->
+  <script type="text/javascript" src="./js/rem.js"></script>
+  <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+  <script type="text/javascript">
+      // JSSDK使用步骤
+
+      window.onload = function () {
+          // 通过config接口注入权限验证配置
+          wx.config({
+              debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+              appId: 'wx16767b1c9414ad7a', // 必填，公众号的唯一标识
+              timestamp: '<%= timestamp %>', // 必填，生成签名的时间戳
+              nonceStr: '<%= noncestr %>', // 必填，生成签名的随机串
+              signature: '<%= signature %>',// 必填，签名
+              jsApiList: [
+                  'startRecord',   //开始录音
+                  'stopRecord',  //停止录音
+                  'translateVoice'  //翻译声音
+              ] // 必填，需要使用的JS接口列表
+          })
+
+          //通过ready接口处理成功验证
+          wx.ready(function(){
+              //基础接口
+              // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，
+              // config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，
+              // 则须把相关接口放在ready函数中调用来确保正确执行。
+              // 对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+
+              wx.checkJsApi({
+                  jsApiList: ['translateVoice'], // 需要检测的JS接口列表，所有JS接口列表见附录2,
+                  success: function(res) {
+                      // 以键值对的形式返回，可用的api值true，不可用为false
+                      // 如：{"checkResult":{"chooseImage":true},"errMsg":"checkJsApi:ok"}
+                      console.log(res)
+                  }
+              })
+          })
+
+          var isRecord = false;
+          //获取dom对象，绑定touchend事件
+          $('#btn').on('touchend', function () {
+              if (isRecord) {
+                  //结束录音（微信的接口）
+                  wx.stopRecord({
+                      success: function (res) {
+                          var localId = res.localId  //录音保存微信服务器中，提供id给我们
+                          //翻译语音
+                          wx.translateVoice({
+                              localId: localId, // 需要识别的音频的本地Id，由录音相关接口获得
+                              isShowProgressTips: 1, // 默认为 1，显示进度提示
+                              success: function (res) {
+                                  //alert(res.translateResult) // 语音识别的结果
+
+                                  /*
+                                  * 这里因为网址不同，就会产生跨域问题
+                                  * 解决，使用了jQuery的 getJSON方法（并且，url中要添加 '&callback=?'参数）
+                                  * */
+                                  var url = 'https://api.douban.com/v2/movie/search?q='+res.translateResult + '&callback=?'
+                                  console.log(url);
+                                  let content = ''
+                                  $.getJSON(url,function (data) {
+                                      //得到的data是一个 json对象，属性值可能会是数组，所以下面进行遍历输出。
+                                      console.log(data.subjects)
+                                      data.subjects.forEach(function (item) {
+                                          content += '<li class="item">\n' +
+                                                          '<a href="<%= commentUrl %>/details?id=' + item.id + '">\n' +
+                                                              '<div class="cover">\n' +
+                                                                  '<img src="' + item.images.small + '" alt="' + item.title + '">\n' +
+                                                              '</div>\n' +
+                                                              '<div class="info">\n' +
+                                                                  '<h3>' + item.title + '</h3>\n' +
+                                                                  '<p class="rank">\n' +
+                                                                      '<span>评分:</span>\n' +
+                                                                      '<span class="rating">' + item.rating.average + '</span>\n' +
+                                                                  '</p>\n' +
+                                                              '</div>\n' +
+                                                          '</a>\n' +
+                                                    '</li>'
+                                      })
+                                      $('.list').html(content)
+                                  })
+                              }
+                          })
+                          isRecord = false
+                      },
+                      error: function (err) {
+                          console.log(err)
+                      }
+                  })
+              } else {
+                  //开始录音（微信的接口）
+                  wx.startRecord({
+                      success: function (res) {
+                          isRecord = true
+                          console.log('录音成功')
+                          console.log(res)
+                      }
+                  })
+              }
+          })
+      }
+  </script>
+
+</body>
+</html>

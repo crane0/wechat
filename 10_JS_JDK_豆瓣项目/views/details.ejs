@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width =device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable = 0" />
+  <title>电影详情</title>
+  <style>
+    *{
+      padding: 0;
+      margin: 0;
+    }
+    #app>header{
+      box-sizing: border-box;
+      width: 100%;
+      height: 2rem;
+      padding: .4rem .5rem;
+      border-bottom: 1px solid #f3f3f3;
+    }
+    #app>header .header_title{
+      float: left;
+      color: #00b600;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    #app>header .header_search{
+      float: right;
+      color: #00b600;
+      font-size: .8rem;
+      font-weight: bold;
+    }
+    #app>.page{
+      box-sizing: border-box;
+      width: 100%;
+      padding: 1rem .5rem 0;
+    }
+    #app>.page>.title{
+      font-size: 1.2rem;
+      font-weight: 300;
+    }
+    #app>.page>.info{
+      width: 100%;
+      height: 7.6rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid #f3f3f3;
+    }
+    #app>.page>.info>.right{
+      float: right;
+      width: 35%;
+    }
+    #app>.page>.info>.right>a{
+      display: block;
+      width: 100%;
+    }
+    #app>.page>.info>.right>a>img{
+      display: block;
+      width: 100%;
+      height: 7.6rem
+    }
+    #app>.page>.info>.left{
+      float: left;
+      width: 56%;
+    }
+    #app>.page>.info>.left>p{
+      font-size: .7rem;
+      color: #494949;
+    }
+    #app>.page>.info>.left>.rating{
+      margin: .2rem 0 .8rem 0;
+    }
+    #app>.page>.info>.left>.meta{
+      font-size: .6rem;
+      line-height: 1.1rem;
+    }
+    #app>.page>.info>.left>.rating>span{
+      color: lightgreen;
+      margin: .2rem 0 .8rem 0;
+    }
+    #app>.page>.info>.left>.rating>.ratingNum{
+      margin-left: .5rem;
+      color: #aaa;
+    }
+
+    h2 {
+      color: #aaa;
+      margin: 0 0 15px;
+      font-size: 15px;
+    }
+    .intro{
+      margin-top: .7rem;
+    }
+    .intro>h2{
+      color: #aaa;
+      font-weight: 400;
+
+    }
+    .intro>.bd{
+      font-size: .6rem;
+      line-height: .8rem;
+      color: #494949;
+    }
+  </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <!--http://371004b5.ngrok.io/movie  返回首页
+                http://371004b5.ngrok.io/search-->
+            <a class="header_title" href="<%= commentUrl %>/movie">硅谷电影</a>
+            <a class="header_search" href="<%= commentUrl %>/search">搜索</a>
+        </header>
+        <div class="page">
+          <!--电影中文名-->
+            <h1 class="title"><%= data.title %></h1>
+
+
+            <!--主要信息-->
+            <section class="info">
+                <div class="left">
+                    <p class="rating">
+                        <span>评分:</span>
+                        <!--平均评分-->
+                        <strong><%= data.rating.average %></strong>
+                        <!--评分人数-->
+                        <span class="ratingNum"><%= data.ratings_count %></span>
+                    </p>
+                    <p class="meta">
+                        <!--114分钟(中国大陆) / 剧情 / 科幻 / 惊悚 / 亚历克斯·嘉兰(导演) / 娜塔莉·波特曼 / 詹妮弗·杰森·李 / 吉娜·罗德里格兹 / 2018-04-13上映-->
+                        <!--时长，制片国家-->
+                        114分钟(<%= data.countries[0] %>) /
+                        <!--影片类型，最多提供3个-->
+                        <% data.genres.forEach(function (item) { %>
+                            <%= item %> /
+                        <% }) %>
+                        <!--导演姓名-->
+                        <%= data.directors[0].name %>(导演) /
+                        <!--主演姓名，最多可获得4个-->
+                        <% data.casts.forEach(function (item) { %>
+                        <%= item.name %> /
+                        <% }) %>
+                        <!--上映年代-->
+                        <%= data.year %> 上映
+                    </p>
+                </div>
+
+                <div class="right">
+                    <a href="javascript:">
+                      <!--海报，名称-->
+                      <img src="<%= data.images.small %>" alt="<%= data.title %>">
+                    </a>
+                </div>
+            </section>
+
+
+            <!--简要剧情-->
+            <section class="intro">
+              <h2><%= data.title %>的剧情简介</h2>
+              <div class="bd">
+                <!--剧情-->
+                  <%= data.summary %>
+              </div>
+            </section>
+        </div>
+    </div>
+<!--因为public是服务器运行的根目录-->
+<script type="text/javascript" src="./js/rem.js"></script>
+</body>
+</html>
